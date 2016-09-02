@@ -7,9 +7,9 @@ const storage = require('node-persist');
 const crypto = require('crypto');
 // Initalized storage.
 storage.initSync();
-var Account = Object.create(null);
-// Function to create Account
-Account.prototype = {
+
+// Creating a class.
+class Account {
   /**
    * Create an account
    *
@@ -18,7 +18,7 @@ Account.prototype = {
    *   string username - Set user name.
    *   string password - Set password.
    */
-  createAccount: function (account) {
+  createAccount (account) {
     // Fetch an array
     var accounts = storage.getItemSync('accounts');
     // Check if anything is in storage.
@@ -32,7 +32,7 @@ Account.prototype = {
     storage.setItemSync('accounts', accounts);
 
     return account;
-  },
+  }
   /**
    * Get the account item.
    *
@@ -43,11 +43,11 @@ Account.prototype = {
    *   Return the matching account that matches account name
    *   if no match, it will return false.
    */
-  getAccount: function (accountName) {
+  getAccount (accountName) {
     // Load account item from storage.
     var accounts = storage.getItemSync('accounts');
     // Iterate over array and return matching account.
-    for (var i = 0; i < accounts.length; i++) {
+    for (let i = 0; i < accounts.length; i++) {
       if (accounts[i].name === accountName) {
         return accounts[i];
         break;
@@ -55,17 +55,20 @@ Account.prototype = {
     }
     // No match.
     return false;
-  },
-};
-// Initialized an object with prototype properties.
-var myAccount = Object.create(Account.prototype);
-var accountInfo = {
-  name: 'John',
-  username: 'wakko',
-  password: 'moo cow',
-};
-// Create the account
-//-- myAccount.createAccount(accountInfo);
-// Retrieve the account.
-console.log(myAccount.getAccount('John'));
+  }
+}
+// Localize everything withing this block.  Must use ES6 Coding standard.
+{
+  // Initialized an object with prototype properties.
+  let accountInfo = {
+    name: 'John',
+    username: 'wakko',
+    password: 'moo cow',
+  };
+  let myAccount = new Account();
+  // Create the account
+  //-- myAccount.createAccount(accountInfo);
+  // Retrieve the account.
+  console.log(myAccount.getAccount('John'));
+}
 
