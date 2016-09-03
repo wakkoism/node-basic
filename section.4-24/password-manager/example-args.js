@@ -2,7 +2,14 @@
 // USAGE: node example-args.js hello --firstname [first name] --lastname [last name]
 //
 // Loading the yargs module.
-const args = require('yargs');
+const args = require('yargs')
+  .command('hello', 'Greets the user', function (yargs) {
+    yargs.options({
+      firstname: {
+        demand: true
+      }
+    });
+  });
 // Assign arguments as variable.
 var myArgs = args.argv;
 // Use the first word after the command, ie: node example-args.js [command]
@@ -13,11 +20,12 @@ switch (command) {
     if (typeof myArgs.firstname !== 'undefined') {
       // Set place holder for last name in case no last name argument is passed.
       let lastName = '';
-      if (typeof myArgs.lastname !== 'undefined') {
-        lastName = myArgs.lastname;
+      // Check if string and not ture, boolean or undefined.
+      if (typeof myArgs.lastname === 'string') {
+        lastName = ' ' + myArgs.lastname;
       }
       // Using ES6, string interpoliation.
-      console.log(`Hello ${myArgs.firstname} ${lastName}!`);
+      console.log(`Hello ${myArgs.firstname + lastName}!`);
     }
     else{
       console.log(`Hello world!`);
