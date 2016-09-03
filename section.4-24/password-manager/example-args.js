@@ -19,4 +19,7 @@ switch (command) {
       // Using ES6, string interpoliation.
       console.log(`Hello ${myArgs.firstname} ${lastName}!`);
     }
+    else{
+      console.log(`Hello world!`);
+    }
 }
