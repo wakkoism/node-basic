@@ -1,4 +1,6 @@
 "use strict";
+// USAGE: node example-args.js hello --firstname [first name] --lastname [last name]
+//
 // Loading the yargs module.
 const args = require('yargs');
 // Assign arguments as variable.
@@ -9,6 +11,7 @@ var command = myArgs._[0];
 switch (command) {
   case 'hello':
     if (typeof myArgs.firstname !== 'undefined') {
+      // Set place holder for last name in case no last name argument is passed.
       let lastName = '';
       if (typeof myArgs.lastname !== 'undefined') {
         lastName = myArgs.lastname;
