@@ -11,6 +11,7 @@
   "license": "ISC",
   "dependencies": {
     "crypto": "0.0.3",
-    "node-persist": "0.0.6"
+    "node-persist": "0.0.6",
+    "yargs": "^5.0.0"
   }
 }
