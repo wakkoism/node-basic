@@ -6,7 +6,8 @@ const args = require('yargs')
   .command('hello', 'Greets the user', function (yargs) {
     yargs.options({
       firstname: {
-        demand: true
+        demand: true,
+        alias: 'f'
       }
     });
   });
@@ -17,7 +18,7 @@ var command = myArgs._[0];
 // Check what command does what.
 switch (command) {
   case 'hello':
-    if (typeof myArgs.firstname !== 'undefined') {
+    if (typeof myArgs.firstname === 'string') {
       // Set place holder for last name in case no last name argument is passed.
       let lastName = '';
       // Check if string and not ture, boolean or undefined.
