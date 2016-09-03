@@ -7,10 +7,18 @@ const args = require('yargs')
     yargs.options({
       firstname: {
         demand: true,
-        alias: 'f'
+        alias: 'f',
+        description: 'Your first name here.',
+      },
+      lastname: {
+        demand: true,
+        alias: 'l',
+        description: 'Your last name here.'
       }
-    });
-  });
+    })
+    .help('help');
+  })
+  .help('help');
 // Assign arguments as variable.
 var myArgs = args.argv;
 // Use the first word after the command, ie: node example-args.js [command]
