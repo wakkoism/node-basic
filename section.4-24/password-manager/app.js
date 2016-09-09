@@ -15,7 +15,7 @@ storage.initSync();
  *   --password
  */
 const args = require('yargs')
-  .command('create', 'Greets the user', function (yargs) {
+  .command('create', 'Create a new account.', function (yargs) {
     yargs.options({
       name: {
         demand: true,
@@ -38,7 +38,7 @@ const args = require('yargs')
     })
     .help('help');
   })
-  .command('get', 'Greets the user', function (yargs) {
+  .command('get', 'Get an existing account by username', function (yargs) {
     yargs.options({
       username: {
         demand: true,
