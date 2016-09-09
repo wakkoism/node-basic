@@ -122,6 +122,7 @@ class Account {
   // Check what command does what.
   switch(command) {
     case 'create':
+      // Shorthand assign object in ES6.
       var {name, username, password} = myArgs
       console.log(myAccount.createAccount({name, username, password}));
       break;
