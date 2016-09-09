@@ -8,6 +8,49 @@ const crypto = require('crypto');
 // Initalized storage.
 storage.initSync();
 
+/**
+ * Create Some account using
+ *   --name
+ *   --username
+ *   --password
+ */
+const args = require('yargs')
+  .command('create', 'Greets the user', function (yargs) {
+    yargs.options({
+      name: {
+        demand: true,
+        alias: 'n',
+        type: 'string',
+        description: 'Your first and last name.',
+      },
+      username: {
+        demand: true,
+        alias: 'u',
+        type: 'string',
+        description: 'Your username.'
+      },
+      password: {
+        demand: true,
+        alias: 'p',
+        type: 'string',
+        description: 'Your password.'
+      }
+    })
+    .help('help');
+  })
+  .command('get', 'Greets the user', function (yargs) {
+    yargs.options({
+      username: {
+        demand: true,
+        alias: 'u',
+        type: 'string',
+        description: 'Get by username.',
+      }
+    })
+    .help('help');
+  })
+  .help('help');
+
 // Creating a class.
 class Account {
   /**
@@ -26,6 +69,15 @@ class Account {
       // Make sure account is an array to allow push new item.
       accounts = [];
     }
+    var duplicateIndex = accounts.findIndex(function (object) {
+      //console.log(account.username);
+      return object.username === account.username
+    });
+
+    if (duplicateIndex !== -1 ) {
+      // Remove duplicate items
+      accounts.splice(duplicateIndex, 1);
+    }
     // Add new account into an array.
     accounts.push(account);
     // Write the account to storage.
@@ -37,20 +89,22 @@ class Account {
    * Get the account item.
    *
    * @param string accoutName
-   *   Get the account with matching account name.
+   *   Get the account with matching username.
    *
    * @return object|false
-   *   Return the matching account that matches account name
+   *   Return the matching account that matches user name
    *   if no match, it will return false.
    */
   getAccount (accountName) {
     // Load account item from storage.
     var accounts = storage.getItemSync('accounts');
     // Iterate over array and return matching account.
-    for (let i = 0; i < accounts.length; i++) {
-      if (accounts[i].name === accountName) {
-        return accounts[i];
-        break;
+    if (typeof accounts !== 'undefined') {
+      for (let i = 0; i < accounts.length; i++) {
+        if (accounts[i].username === accountName) {
+          return accounts[i];
+          break;
+        }
       }
     }
     // No match.
@@ -59,16 +113,23 @@ class Account {
 }
 // Localize everything withing this block.  Must use ES6 Coding standard.
 {
-  // Initialized an object with prototype properties.
-  let accountInfo = {
-    name: 'John',
-    username: 'wakko',
-    password: 'moo cow',
-  };
+  // Assign arguments as variable.
+  let myArgs = args.argv;
+  // Use the first word after the command, ie: node example-args.js [command]
+  let command = myArgs._[0];
+  // Initialized class.
   let myAccount = new Account();
-  // Create the account
-  //-- myAccount.createAccount(accountInfo);
-  // Retrieve the account.
-  console.log(myAccount.getAccount('John'));
+  // Check what command does what.
+  switch(command) {
+    case 'create':
+      var {name, username, password} = myArgs
+      console.log(myAccount.createAccount({name, username, password}));
+      break;
+
+    case 'get':
+      console.log(myAccount.getAccount(myArgs.username));
+      break;
+  }
+
 }
 
