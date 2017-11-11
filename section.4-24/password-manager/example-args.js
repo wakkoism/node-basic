@@ -8,11 +8,13 @@ const args = require('yargs')
       firstname: {
         demand: true,
         alias: 'f',
+        type: 'string',
         description: 'Your first name here.',
       },
       lastname: {
         demand: true,
         alias: 'l',
+        type: 'string',
         description: 'Your last name here.'
       }
     })

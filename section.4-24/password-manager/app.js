@@ -38,7 +38,7 @@ const args = require('yargs')
     })
     .help('help');
   })
-  .command('get', 'Get an existing account by username', function (yargs) {
+  .command('get', 'Get an existing account by username', (yargs) => {
     yargs.options({
       username: {
         demand: true,
@@ -123,12 +123,12 @@ class Account {
   switch(command) {
     case 'create':
       // Shorthand assign object in ES6.
-      var {name, username, password} = myArgs
-      console.log(myAccount.createAccount({name, username, password}));
+      var { name, username, password } = myArgs
+      console.log(myAccount.createAccount({ name, username, password }));
       break;
 
     case 'get':
-      console.log(myAccount.getAccount(myArgs.username));
+      console.log(myAccount.getAccount( myArgs.username ));
       break;
   }
 
