@@ -1,12 +1,16 @@
 const crypto = require('crypto-js');
 // Secret message.
-const secretMessage = 'I hid the chips under the couch.';
+const secretMessage = {
+  name: 'John',
+  secretName: '007',
+};
 // Secret key.
 const secretKey = '123abc';
 
-let encryptedMesage = crypto.AES.encrypt(secretMessage, secretKey);
+let encryptedMesage = crypto.AES.encrypt(JSON.stringify(secretMessage), secretKey);
 // Encrytped message.
 console.log(`Encrypted Message:  ${encryptedMesage}`);
 let bytes = crypto.AES.decrypt(encryptedMesage, secretKey);
 // Decrypted mesage.
-console.log(`Decrypted Message: ${bytes.toString(crypto.enc.Utf8)}`);
+let decryptedMessage = JSON.parse(bytes.toString(crypto.enc.Utf8));
+console.log(`Decrypted Message: ${decryptedMessage.secretName}`);
