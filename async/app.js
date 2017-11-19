@@ -18,8 +18,8 @@ const myArgs = args
     location((error, response, body) => {
       if (!error) {
         locationArg = body.city;
-        weather(locationArg, (body) => {
-          console.log(`It's ${body.main.temp} in ${body.name}!`);
+        weather(locationArg, (weatherResponse) => {
+          console.log(`It's ${weatherResponse.main.temp} in ${weatherResponse.name}!`);
         });
       }
     });
