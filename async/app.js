@@ -13,19 +13,18 @@ const myArgs = args
   .help('help')
   .argv;
 {
-  let locationArg = myArgs.location;
+  const locationArg = myArgs.location;
+
   if (!locationArg) {
-    location((error, response, body) => {
-      if (!error) {
-        locationArg = body.city;
-        weather(locationArg, (weatherResponse) => {
-          console.log(`It's ${weatherResponse.main.temp} in ${weatherResponse.name}!`);
-        });
-      }
-    });
+    location()
+      .then(city => weather(city))
+      .then((weatherResponse) => {
+        console.log(`It's ${weatherResponse.main.temp} in ${weatherResponse.name}!`);
+      });
   } else {
-    weather(locationArg, (body) => {
-      console.log(`It's ${body.main.temp} in ${body.name}!`);
-    });
+    weather(locationArg)
+      .then((body) => {
+        console.log(`It's ${body.main.temp} in ${body.name}!`);
+      });
   }
 }

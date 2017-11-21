@@ -2,9 +2,15 @@ const request = require('request');
 
 const url = 'http://ipinfo.io';
 
-module.exports = (callback) => {
+module.exports = () => new Promise((resolve, reject) => {
   request({
     url,
     json: true,
-  }, callback);
-};
+  }, (error, response, location) => {
+    if (error) {
+      reject(new Error(error));
+    } else {
+      resolve(location.city);
+    }
+  });
+});
