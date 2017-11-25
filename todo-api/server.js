@@ -6,7 +6,7 @@ const app = express();
 const port = process.env.PORT || 3000;
 let todoNextId = 1;
 
-const todos = [
+let todos = [
   {
     id: 1,
     description: 'Meet mom for lunch',
@@ -67,6 +67,18 @@ app.post('/todos', (request, response) => {
   todos.push(_.pick(body, 'description', 'completed', 'id'));
   return response.json(todos);
 });
+// Delete todos
+app.delete('/todo/:id', (request, response) => {
+  const { id } = request.params;
+  const todo = _.findWhere(todos, { id: Number(id) });
+  if (todo) {
+    response.status(200).send(todo);
+    todos = _.without(todos, todo);
+  } else {
+    response.status(404).json({ error: 'No todo id found' });
+  }
+});
+
 
 app.listen(port, () => {
   console.log(`Express listening on port ${port}!`);
