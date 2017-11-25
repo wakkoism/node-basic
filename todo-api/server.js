@@ -1,5 +1,6 @@
 const express = require('express');
 const bodyParser = require('body-parser');
+const _ = require('underscore');
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -23,9 +24,6 @@ const todos = [
   },
 ];
 
-// Function that finds the key value pair inside of the array of objects.
-const getKeyByValue = (object, key, value) => object.find(element => element[key] === value);
-
 // Assuming that the last item of the array has the highest id.
 const getTodoNextId = () => {
   todoNextId = Number(todos[todos.length - 1].id) + 1;
@@ -46,7 +44,7 @@ app.get('/todos', (request, response) => {
 app.get('/todo/:id', (request, response) => {
   const { id } = request.params;
 
-  const todo = getKeyByValue(todos, 'id', Number(id));
+  const todo = _.findWhere(todos, { id: Number(id) });
   if (todo) {
     response.json(todo);
   } else {
@@ -56,13 +54,18 @@ app.get('/todo/:id', (request, response) => {
 // POST request /todos
 app.post('/todos', (request, response) => {
   const { body } = request;
-  console.log(body);
+  if (!_.isString(body.description)
+      || !_.isBoolean(body.completed)
+      || body.description.trim() === '') {
+    return response.status(400).send();
+  }
+  body.description = body.description.trim();
   // Add to todos item
   body.id = todoNextId;
   // Increment by 1;
   todoNextId += 1;
-  todos.push(body);
-  response.json(todos);
+  todos.push(_.pick(body, 'description', 'completed', 'id'));
+  return response.json(todos);
 });
 
 app.listen(port, () => {
