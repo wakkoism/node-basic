@@ -1,7 +1,10 @@
 const express = require('express');
+const bodyParser = require('body-parser');
 
 const app = express();
 const port = process.env.PORT || 3000;
+let todoNextId = 1;
+
 const todos = [
   {
     id: 1,
@@ -19,17 +22,27 @@ const todos = [
     completed: true,
   },
 ];
+
 // Function that finds the key value pair inside of the array of objects.
 const getKeyByValue = (object, key, value) => object.find(element => element[key] === value);
 
+// Assuming that the last item of the array has the highest id.
+const getTodoNextId = () => {
+  todoNextId = Number(todos[todos.length - 1].id) + 1;
+};
+// Initialized to get the last number
+getTodoNextId();
+// Initialized middleware.
+app.use(bodyParser.json());
+// When loading just the index page.
 app.get('/', (request, response) => {
   response.send('Todo API Root');
 });
-
+// Get all the todos object.
 app.get('/todos', (request, response) => {
   response.json(todos);
 });
-
+// Get todos by ID.
 app.get('/todo/:id', (request, response) => {
   const { id } = request.params;
 
@@ -39,6 +52,17 @@ app.get('/todo/:id', (request, response) => {
   } else {
     response.status(404).send();
   }
+});
+// POST request /todos
+app.post('/todos', (request, response) => {
+  const { body } = request;
+  console.log(body);
+  // Add to todos item
+  body.id = todoNextId;
+  // Increment by 1;
+  todoNextId += 1;
+  todos.push(body);
+  response.json(todos);
 });
 
 app.listen(port, () => {
