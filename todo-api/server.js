@@ -43,7 +43,17 @@ app.get('/', (request, response) => {
 });
 // Get all the todos object.
 app.get('/todos', (request, response) => {
-  response.json(todos);
+  const queryParams = request.query;
+  let filterTodos = todos;
+
+  if (Object.hasOwnProperty.call(queryParams, 'completed')) {
+    if (queryParams.completed === 'true') {
+      filterTodos = _.where(todos, { completed: true });
+    } else if (queryParams.completed === 'false') {
+      filterTodos = _.where(todos, { completed: false });
+    }
+  }
+  response.json(filterTodos);
 });
 // Get todos by ID.
 app.get('/todo/:id', (request, response) => {
