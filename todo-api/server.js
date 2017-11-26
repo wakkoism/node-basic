@@ -28,6 +28,11 @@ let todos = [
 const getTodoNextId = () => {
   todoNextId = Number(todos[todos.length - 1].id) + 1;
 };
+
+const getTodoById = (request) => {
+  const { id } = request.params;
+  return _.findWhere(todos, { id: Number(id) });
+};
 // Initialized to get the last number
 getTodoNextId();
 // Initialized middleware.
@@ -42,9 +47,7 @@ app.get('/todos', (request, response) => {
 });
 // Get todos by ID.
 app.get('/todo/:id', (request, response) => {
-  const { id } = request.params;
-
-  const todo = _.findWhere(todos, { id: Number(id) });
+  const todo = getTodoById(request);
   if (todo) {
     response.json(todo);
   } else {
@@ -69,16 +72,41 @@ app.post('/todos', (request, response) => {
 });
 // Delete todos
 app.delete('/todo/:id', (request, response) => {
-  const { id } = request.params;
-  const todo = _.findWhere(todos, { id: Number(id) });
+  const todo = getTodoById(request);
+
   if (todo) {
-    response.status(200).send(todo);
+    response.status(200).json(todo);
     todos = _.without(todos, todo);
   } else {
     response.status(404).json({ error: 'No todo id found' });
   }
 });
 
+app.put('/todo/:id', (request, response) => {
+  const todo = getTodoById(request);
+  if (todo) {
+    let { body } = request;
+    const hasDescription = Object.prototype.hasOwnProperty.call(body, 'description');
+    const hasCompleted = Object.prototype.hasOwnProperty.call(body, 'completed');
+
+    if ((hasDescription && (!_.isString(body.description) || body.description.trim() === ''))
+        || (hasCompleted && !_.isBoolean(body.completed)
+        )) {
+      return response.status(400).send();
+    }
+    const { id } = request.params;
+    if (hasDescription) {
+      body.description = body.description.trim();
+    }
+    body.id = Number(id);
+    // Add to todos item
+    // Increment by 1;
+    body = _.pick(body, 'description', 'completed', 'id');
+    _.extend(todo, body);
+    return response.json(body);
+  }
+  return response.status(404).json({ error: 'No todo id found' });
+});
 
 app.listen(port, () => {
   console.log(`Express listening on port ${port}!`);
