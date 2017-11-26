@@ -53,6 +53,14 @@ app.get('/todos', (request, response) => {
       filterTodos = _.where(todos, { completed: false });
     }
   }
+  if (Object.hasOwnProperty.call(queryParams, 'q')) {
+    const description = queryParams.q.trim();
+    if (description !== '') {
+      filterTodos = _.filter(filterTodos, (todo => todo.description
+        .toLowerCase()
+        .indexOf(description.toLowerCase()) !== -1));
+    }
+  }
   response.json(filterTodos);
 });
 // Get todos by ID.
