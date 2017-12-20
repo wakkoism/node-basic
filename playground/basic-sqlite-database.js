@@ -33,7 +33,6 @@ sequelize.sync()
     description: 'More stuff needs to be done.',
     created: true,
   }))
-  //Todo.findById(1))
   .then(() => Todo.findAll({
     where: {
       completed: false,
