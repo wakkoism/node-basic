@@ -12,10 +12,7 @@ const getTodoNextId = () => {
   //todoNextId = Number(todos[todos.length - 1].id) + 1;
 };
 
-const getTodoById = (request) => {
-  const { id } = request.params;
-  return _.findWhere(todos, { id: Number(id) });
-};
+
 // Initialized to get the last number
 getTodoNextId();
 // Initialized middleware.
@@ -48,12 +45,19 @@ app.get('/todos', (request, response) => {
 });
 // Get todos by ID.
 app.get('/todo/:id', (request, response) => {
-  const todo = getTodoById(request);
-  if (todo) {
-    response.json(todo);
-  } else {
-    response.status(404).send();
-  }
+  const { id } = request.params;
+  db.todo
+    .findById(parseInt(id, 10))
+    .then((todo) => {
+      // Can return an empty object.
+      if (!_.isEmpty(todo)) {
+        response.json(todo.toJSON());
+      } else {
+        response.status(404).send();
+      }
+    }, (e) => {
+      response.status(500).send(e);
+    });
 });
 // POST request /todos
 app.post('/todos', (request, response) => {
