@@ -5,16 +5,7 @@ const db = require('../db.js');
 
 const app = express();
 const port = process.env.PORT || 3000;
-let todoNextId = 1;
 
-// Assuming that the last item of the array has the highest id.
-const getTodoNextId = () => {
-  //todoNextId = Number(todos[todos.length - 1].id) + 1;
-};
-
-
-// Initialized to get the last number
-getTodoNextId();
 // Initialized middleware.
 app.use(bodyParser.json());
 // When loading just the index page.
@@ -23,25 +14,35 @@ app.get('/', (request, response) => {
 });
 // Get all the todos object.
 app.get('/todos', (request, response) => {
-  const queryParams = request.query;
-  let filterTodos = todos;
+  const { query } = request;
+  const where = {};
 
-  if (Object.hasOwnProperty.call(queryParams, 'completed')) {
-    if (queryParams.completed === 'true') {
-      filterTodos = _.where(todos, { completed: true });
-    } else if (queryParams.completed === 'false') {
-      filterTodos = _.where(todos, { completed: false });
+  if (Object.hasOwnProperty.call(query, 'completed')) {
+    if (query.completed === 'true') {
+      where.completed = true;
+    } else if (query.completed === 'false') {
+      where.completed = false;
     }
   }
-  if (Object.hasOwnProperty.call(queryParams, 'q')) {
-    const description = queryParams.q.trim();
-    if (description !== '') {
-      filterTodos = _.filter(filterTodos, (todo => todo.description
-        .toLowerCase()
-        .indexOf(description.toLowerCase()) !== -1));
+  if (Object.hasOwnProperty.call(query, 'q')) {
+    const description = query.q.trim();
+    if (description.length > 0) {
+      where.description = {
+        $like: `%${description}%`,
+      };
     }
   }
-  response.json(filterTodos);
+  db.todo
+    .findAll({ where })
+    .then((todos) => {
+      if (!_.isEmpty(todos)) {
+        response.json(todos);
+      } else {
+        response.status(404).send();
+      }
+    }, (e) => {
+      response.status(500).send(e);
+    });
 });
 // Get todos by ID.
 app.get('/todo/:id', (request, response) => {
@@ -68,19 +69,28 @@ app.post('/todos', (request, response) => {
   }).then((todo) => {
     response.json(todo.toJSON());
   }, (e) => {
-    console.log(e);
     response.status(400).json(e);
   });
 });
 // Delete todos
 app.delete('/todo/:id', (request, response) => {
-  const todo = getTodoById(request);
-
-  if (todo) {
-    response.status(200).json(todo);
-    todos = _.without(todos, todo);
+  const { id } = request.params;
+  if (parseInt(id, 10) > 0) {
+    db.todo
+      .destroy({
+        where: { id },
+      })
+      .then((todo) => {
+        if (todo > 0) {
+          response.status(200).send();
+        } else {
+          response.status(404).send({ error: 'ID not found' });
+        }
+      }, (e) => {
+        response.status(400).json(e);
+      });
   } else {
-    response.status(404).json({ error: 'No todo id found' });
+    response.status(400).json({ error: 'ID must be in integer.' });
   }
 });
 
