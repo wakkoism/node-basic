@@ -82,7 +82,7 @@ app.delete('/todo/:id', (request, response) => {
       })
       .then((todo) => {
         if (todo > 0) {
-          response.status(200).send();
+          response.status(204).send();
         } else {
           response.status(404).send({ error: 'ID not found' });
         }
@@ -95,29 +95,33 @@ app.delete('/todo/:id', (request, response) => {
 });
 
 app.put('/todo/:id', (request, response) => {
-  const todo = getTodoById(request);
-  if (todo) {
-    let { body } = request;
+  const { id } = request.params;
+  const fields = {};
+  if (parseInt(id, 10) > 0) {
+    const { body } = request;
     const hasDescription = Object.prototype.hasOwnProperty.call(body, 'description');
     const hasCompleted = Object.prototype.hasOwnProperty.call(body, 'completed');
 
-    if ((hasDescription && (!_.isString(body.description) || body.description.trim() === ''))
-        || (hasCompleted && !_.isBoolean(body.completed)
-        )) {
-      return response.status(400).send();
-    }
-    const { id } = request.params;
     if (hasDescription) {
-      body.description = body.description.trim();
+      fields.description = body.description;
     }
-    body.id = Number(id);
-    // Add to todos item
-    // Increment by 1;
-    body = _.pick(body, 'description', 'completed', 'id');
-    _.extend(todo, body);
-    return response.json(body);
+    if (hasCompleted) {
+      fields.completed = body.completed;
+    }
+    db.todo
+      .update(fields, { where: { id } })
+      .spread((affectedCount) => {
+        if (affectedCount) {
+          response.status(200).send();
+        } else {
+          response.status(404).send();
+        }
+      }, (e) => {
+        response.status(400).json(e);
+      });
+  } else {
+    response.status(400).json({ error: 'ID must be in integer.' });
   }
-  return response.status(404).json({ error: 'No todo id found' });
 });
 
 db.sequelize
