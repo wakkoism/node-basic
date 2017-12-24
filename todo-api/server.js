@@ -124,6 +124,18 @@ app.put('/todo/:id', (request, response) => {
   }
 });
 
+// POST request /todos
+app.post('/users', (request, response) => {
+  const body = _.pick(request.body, 'email', 'password');
+  db.user
+    .create(body)
+    .then((user) => {
+      response.json(user.toJSON());
+    }, (e) => {
+      response.status(400).json(e);
+    });
+});
+
 db.sequelize
   .sync()
   .then(() => {

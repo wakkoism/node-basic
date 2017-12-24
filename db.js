@@ -3,7 +3,7 @@ const path = require('path');
 
 const env = process.env.NODE_ENV || 'development';
 
-let sequelize;
+let sequelize = null;
 
 if (env === 'production') {
   sequelize = new Sequelize(process.env.DATABASE_URL, {
@@ -19,6 +19,8 @@ if (env === 'production') {
 const db = {};
 
 db.todo = sequelize.import(path.join(__dirname, 'models', 'todo.js'));
+db.user = sequelize.import(path.join(__dirname, 'models', 'user.js'));
+
 db.sequelize = sequelize;
 db.Sequelize = Sequelize;
 module.exports = db;
