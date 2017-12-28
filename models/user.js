@@ -42,6 +42,26 @@ module.exports = (sequelize, DataTypes) => sequelize.define('user', {
       }
     },
   },
+  classMethods: {
+    authenticate(body) {
+      return new Promise((resolve, reject) => {
+        if (typeof body.email === 'string' && body.email.trim().length > 0 && typeof body.password === 'string' && body.password.length > 0) {
+          this
+            .findOne({
+              where: { email: body.email },
+            })
+            .then((user) => {
+              if (!user || !bcrypt.compareSync(body.password, user.get('password_hash'))) {
+                return reject();
+              }
+              return resolve(user);
+            }, () => reject());
+        } else {
+          reject();
+        }
+      });
+    },
+  },
   instanceMethods: {
     toPublicJSON() {
       const json = this.toJSON();

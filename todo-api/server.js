@@ -136,8 +136,20 @@ app.post('/users', (request, response) => {
     });
 });
 
+// POST request /users/login
+app.post('/users/login', (request, response) => {
+  const body = _.pick(request.body, 'email', 'password');
+  db.user
+    .authenticate(body)
+    .then((user) => {
+      response.json(user.toPublicJSON());
+    }, () => {
+      response.status(401).send();
+    });
+});
+
 db.sequelize
-  .sync()
+  .sync({ force: true })
   .then(() => {
     app.listen(port, () => {
       console.log(`Express listening on port ${port}!`);

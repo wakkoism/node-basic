@@ -13,6 +13,7 @@ if (env === 'production') {
   sequelize = new Sequelize(undefined, undefined, undefined, {
     dialect: 'sqlite',
     storage: path.join(__dirname, 'data', 'dev-todo-api.sqlite'),
+    logging: console.log,
   });
 }
 
