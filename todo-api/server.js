@@ -16,7 +16,7 @@ app.get('/', (request, response) => {
 // Get all the todos object.
 app.get('/todos', middleware.requireAuthentication, (request, response) => {
   const { query } = request;
-  const where = {};
+  const where = { userId: request.user.get('id') };
 
   if (Object.hasOwnProperty.call(query, 'completed')) {
     if (query.completed === 'true') {
@@ -49,7 +49,12 @@ app.get('/todos', middleware.requireAuthentication, (request, response) => {
 app.get('/todo/:id', middleware.requireAuthentication, (request, response) => {
   const { id } = request.params;
   db.todo
-    .findById(parseInt(id, 10))
+    .findOne({
+      where: {
+        id: parseInt(id, 10),
+        userId: request.user.get('id'),
+      },
+    })
     .then((todo) => {
       // Can return an empty object.
       if (!_.isEmpty(todo)) {
@@ -84,7 +89,10 @@ app.delete('/todo/:id', middleware.requireAuthentication, (request, response) =>
   if (parseInt(id, 10) > 0) {
     db.todo
       .destroy({
-        where: { id },
+        where: {
+          id,
+          userId: request.user.get('id'),
+        },
       })
       .then((todo) => {
         if (todo > 0) {
@@ -115,7 +123,12 @@ app.put('/todo/:id', middleware.requireAuthentication, (request, response) => {
       fields.completed = body.completed;
     }
     db.todo
-      .update(fields, { where: { id } })
+      .update(fields, {
+        where: {
+          id,
+          userId: request.user.get('id'),
+        },
+      })
       .spread((affectedCount) => {
         if (affectedCount) {
           response.status(200).send();
