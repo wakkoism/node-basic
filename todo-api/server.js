@@ -2,6 +2,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const _ = require('underscore');
 const db = require('../db.js');
+const middleware = require('./middleware.js')(db);
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -13,7 +14,7 @@ app.get('/', (request, response) => {
   response.send('Todo API Root');
 });
 // Get all the todos object.
-app.get('/todos', (request, response) => {
+app.get('/todos', middleware.requireAuthentication, (request, response) => {
   const { query } = request;
   const where = {};
 
@@ -45,7 +46,7 @@ app.get('/todos', (request, response) => {
     });
 });
 // Get todos by ID.
-app.get('/todo/:id', (request, response) => {
+app.get('/todo/:id', middleware.requireAuthentication, (request, response) => {
   const { id } = request.params;
   db.todo
     .findById(parseInt(id, 10))
@@ -61,7 +62,7 @@ app.get('/todo/:id', (request, response) => {
     });
 });
 // POST request /todos
-app.post('/todos', (request, response) => {
+app.post('/todos', middleware.requireAuthentication, (request, response) => {
   const { body } = request;
   db.todo.create({
     description: body.description,
@@ -73,7 +74,7 @@ app.post('/todos', (request, response) => {
   });
 });
 // Delete todos
-app.delete('/todo/:id', (request, response) => {
+app.delete('/todo/:id', middleware.requireAuthentication, (request, response) => {
   const { id } = request.params;
   if (parseInt(id, 10) > 0) {
     db.todo
@@ -94,7 +95,7 @@ app.delete('/todo/:id', (request, response) => {
   }
 });
 
-app.put('/todo/:id', (request, response) => {
+app.put('/todo/:id', middleware.requireAuthentication, (request, response) => {
   const { id } = request.params;
   const fields = {};
   if (parseInt(id, 10) > 0) {
