@@ -21,6 +21,9 @@ const db = {};
 
 db.todo = sequelize.import(path.join(__dirname, 'models', 'todo.js'));
 db.user = sequelize.import(path.join(__dirname, 'models', 'user.js'));
+// Add the relationship between the user and todos database.
+db.todo.belongsTo(db.user);
+db.user.hasMany(db.todo);
 
 db.sequelize = sequelize;
 db.Sequelize = Sequelize;
