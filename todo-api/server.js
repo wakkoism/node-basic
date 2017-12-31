@@ -158,22 +158,27 @@ app.post('/users', (request, response) => {
 // POST request /users/login
 app.post('/users/login', (request, response) => {
   const body = _.pick(request.body, 'email', 'password');
+  let userInstance = {};
   db.user
     .authenticate(body)
     .then((user) => {
       const token = user.generateToken('authentication');
-      if (token) {
-        response.header('Auth', token).json(user.toPublicJSON());
-      } else {
-        response.status(401).send();
-      }
-    }, () => {
+      userInstance = user;
+
+      return db.token.create({
+        token,
+      });
+    })
+    .then((tokenInstance) => {
+      response.header('Auth', tokenInstance.get('token')).json(userInstance.toPublicJSON());
+    }).catch(() => {
       response.status(401).send();
     });
 });
 
 db.sequelize
-  .sync({ force: true })
+  // Add {force: true} to wipe table on each node start
+  .sync({ force: true, logging: console.log })
   .then(() => {
     app.listen(port, () => {
       console.log(`Express listening on port ${port}!`);
