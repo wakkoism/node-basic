@@ -1,8 +1,10 @@
+const config = require('../config.js');
 const express = require('express');
 const bodyParser = require('body-parser');
 const _ = require('underscore');
 const db = require('../db.js');
 const middleware = require('./middleware.js')(db);
+const postmark = require('postmark');
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -37,6 +39,8 @@ app.get('/todos', middleware.requireAuthentication, (request, response) => {
     .findAll({ where })
     .then((todos) => {
       if (!_.isEmpty(todos)) {
+        // Iterate through each todos and see if there are any pass due date.
+        todos.map(todo => todo.toPublicJSON());
         response.json(todos);
       } else {
         response.status(404).send();
@@ -58,7 +62,7 @@ app.get('/todo/:id', middleware.requireAuthentication, (request, response) => {
     .then((todo) => {
       // Can return an empty object.
       if (!_.isEmpty(todo)) {
-        response.json(todo.toJSON());
+        response.json(todo.toPublicJSON());
       } else {
         response.status(404).send();
       }
@@ -72,6 +76,7 @@ app.post('/todos', middleware.requireAuthentication, (request, response) => {
   db.todo.create({
     description: body.description,
     completed: body.completed,
+    dueDate: body.dueDate,
   }).then((todo) => {
     request.user
       .addTodo(todo)
@@ -115,12 +120,16 @@ app.put('/todo/:id', middleware.requireAuthentication, (request, response) => {
     const { body } = request;
     const hasDescription = Object.prototype.hasOwnProperty.call(body, 'description');
     const hasCompleted = Object.prototype.hasOwnProperty.call(body, 'completed');
+    const hasDueDate = Object.prototype.hasOwnProperty.call(body, 'dueDate');
 
     if (hasDescription) {
       fields.description = body.description;
     }
     if (hasCompleted) {
       fields.completed = body.completed;
+    }
+    if (hasDueDate) {
+      fields.dueDate = body.dueDate;
     }
     db.todo
       .update(fields, {
@@ -152,6 +161,21 @@ app.post('/users', (request, response) => {
       response.json(user.toPublicJSON());
     }, (e) => {
       response.status(400).json(e);
+    })
+    .then(() => {
+      if (typeof config.postmarkAPIKey === 'string') {
+        const client = new postmark.Client(config.postmarkAPIKey);
+        client.sendEmail({
+          From: 'john.le@designerwak.com',
+          To: 'john.le@designerwak.com',
+          Subject: 'New user has sign up',
+          TextBody: `User email: ${body.email} has sign sign up to the TODO app`,
+        }, (error) => {
+          if (error) {
+            console.error(error);
+          }
+        });
+      }
     });
 });
 
@@ -165,13 +189,12 @@ app.post('/users/login', (request, response) => {
       const token = user.generateToken('authentication');
       userInstance = user;
 
-      return db.token.create({
-        token,
-      });
+      return db.token.create({ token });
     })
     .then((tokenInstance) => {
       response.header('Auth', tokenInstance.get('token')).json(userInstance.toPublicJSON());
-    }).catch(() => {
+    })
+    .catch(() => {
       response.status(401).send();
     });
 });
