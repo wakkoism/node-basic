@@ -176,9 +176,21 @@ app.post('/users/login', (request, response) => {
     });
 });
 
+// DELETE /user/login
+app.delete('/users/login', middleware.requireAuthentication, (request, response) => {
+  request.token
+    .destroy()
+    .then(() => {
+      response.status(204).send();
+    })
+    .catch(() => {
+      response.status(500).send();
+    });
+});
+
 db.sequelize
   // Add {force: true} to wipe table on each node start
-  .sync({ force: true, logging: console.log })
+  .sync({ logging: console.log })
   .then(() => {
     app.listen(port, () => {
       console.log(`Express listening on port ${port}!`);
