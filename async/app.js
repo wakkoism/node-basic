@@ -16,11 +16,19 @@ const myArgs = args
   const locationArg = myArgs.location;
 
   if (!locationArg) {
+    const makeRequest = async() => {
+      const city = await location();
+      const weatherResponse = await weather(city);
+      console.log(`It's ${weatherResponse.main.temp} in ${weatherResponse.name}!`);
+    }
+    makeRequest();
+    /*
     location()
       .then(city => weather(city))
       .then((weatherResponse) => {
         console.log(`It's ${weatherResponse.main.temp} in ${weatherResponse.name}!`);
       });
+    */
   } else {
     weather(locationArg)
       .then((body) => {
